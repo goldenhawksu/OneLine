@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   try {
     // 从请求体中获取查询和SearXNG配置
     const requestData = await request.json();
-    const { query, searxngUrl } = requestData;
+    const { query, searxngUrl = 'https://searxng.aesc.ai/' } = requestData;
 
     // 如果没有提供SearXNG URL或查询，返回错误
     if (!searxngUrl || !query) {
@@ -99,8 +99,12 @@ export async function POST(request: Request) {
           params,
           timeout: timeout,
           headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (OneLine/1.0; +https://github.com/chengtx809/OneLine)'
+            'Accept': 'application/json, text/html',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
           }
         });
 
@@ -185,7 +189,7 @@ export async function POST(request: Request) {
         }
 
         // 等待一段时间后重试
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, error?.response?.status === 429 ? 3000 + attempt * 1000 : 1000));
       }
     }
 
@@ -198,7 +202,7 @@ export async function POST(request: Request) {
 
     // 构建错误信息
     const errorDetails = {
-      error: 'SearXNG search request failed after multiple attempts',
+      error: '搜索暂不可用',
       error_code: errorCode,
       error_description: errorDescription,
       message: lastError?.message,
