@@ -58,7 +58,8 @@ export async function POST(request: Request) {
   try {
     // 从环境变量中获取 API 密钥和端点
     const apiKey = process.env.API_KEY;
-    const apiEndpoint = process.env.API_ENDPOINT;
+    const rawEndpoint = process.env.API_ENDPOINT;
+    const apiEndpoint = rawEndpoint ? (rawEndpoint.replace(/\/+$/, '').endsWith('/chat/completions') ? rawEndpoint.replace(/\/+$/, '') : rawEndpoint.replace(/\/+$/, '') + '/chat/completions') : undefined;
     const apiModel = process.env.API_MODEL || 'gemini-2.0-pro-exp-search';
 
     // 解析请求体
@@ -115,6 +116,7 @@ export async function POST(request: Request) {
 
     // 构建请求头
     const headers = {
+      'User-Agent': 'Mozilla/5.0',
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${finalApiKey}`
     };
